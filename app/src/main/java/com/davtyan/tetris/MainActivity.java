@@ -49,7 +49,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 gameSurfaceView.isMoveRight = true;
                 break;
             case R.id.rotate:
-               // figure.rotate()
+                gameSurfaceView.isRotate = true;
                 break;
                case R.id.down:
                gameSurfaceView.sleepData(3);
