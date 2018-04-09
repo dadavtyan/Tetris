@@ -16,7 +16,7 @@ import java.util.List;
 public class GameSurfaceView extends SurfaceView implements Runnable {
     private boolean running;
     private Thread thread;
-    private Figure figure;
+    private FigureState figure;
     private SurfaceHolder surfaceHolder;
     private Paint paint;
     public List<Coordinate> coordinates;
@@ -27,6 +27,8 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
     private int sleepData = 1000;
     private int lineCount;
     private int[] color =  {Color.RED,Color.BLUE,Color.BLACK,Color.CYAN};
+    private int [] deleteItem = new int[11];
+    private int dY;
 
     public GameSurfaceView(Context c, AttributeSet attrs) {
         this(c, attrs, 0);
@@ -34,7 +36,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
 
     public GameSurfaceView(Context c, AttributeSet attrs, int defStyle) {
         super(c, attrs, defStyle);
-        figure = new Figure(this);
+        figure = new FigureState(this);
         surfaceHolder = getHolder();
         backgroundPaint = new Paint();
         backgroundPaint.setColor(Color.WHITE);
@@ -111,10 +113,10 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
                 surfaceHolder.unlockCanvasAndPost(canvas);
                 try {
                     Thread.sleep(sleepData);
-                    if (isMoveLeft) figure.left();
-                    if (isMoveRight) figure.right();
-                    if (isRotate) figure.rotate();
-                    figure.fall(dY);
+                    if (isMoveLeft) figure.left(coordinates);
+                    if (isMoveRight) figure.right(coordinates);
+                    if (isRotate) figure.rotate(coordinates);
+                    figure.move(dY,coordinates);
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -126,7 +128,7 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
 
     private void drawRect(List<Coordinate> coordinateList, Canvas canvas) {
         for (int i = 0; i < coordinateList.size(); i++) {
-            paint.setColor(color[i]);
+           // paint.setColor(color[i]);
             canvas.drawRect(
                     coordinateList.get(i).getX(),
                     coordinateList.get(i).getY(),
@@ -141,40 +143,66 @@ public class GameSurfaceView extends SurfaceView implements Runnable {
         coordinatesN.addAll(coordinates);
         coordinates = figure.updateCoordinate();
         figure.setRotate(100);
+        checkFullLine();
+    }
 
-//        for (int i = 0; i < coordinates.size(); i++) {
-//            clearLineList.get(coordinates.get(i).getX()/100)[i]
-//
-//        }
-
-        for (int i = 15; i > 7; i--) {
+    private void checkFullLine() {
+        for (int i = 15; i > 1; i--) {
             for (int j = 0; j < coordinatesN.size(); j++) {
-              //  Log.i("lineCount","lineCount = " + coordinatesN.get(j).getY());
+                //  Log.i("lineCount","lineCount = " + coordinatesN.get(j).getY());
                 if (i * 100 == coordinatesN.get(j).getY() ){
+                    deleteItem[lineCount] = j;
                     lineCount++;
-
                 }
 
 
-                Log.i("lineCount","lineCount = " + lineCount);
+
                 if (lineCount >= 11){
+                    selectionSort(deleteItem);
+                    for (int k = 0; k < deleteItem.length; k++) {
+                        Log.i("lineCount","lineCount = " + deleteItem[k]);
+                    }
+
+                    for (int f = 10; f > -1; f--) {
+                        coordinatesN.remove(deleteItem[f]);
+
+                    }
+                    figure.fillDeletedLine(100,i * 100);
+                    lineCount = 0;
+                    checkFullLine();
                     break;
                 }
 
             }
-            if (lineCount < 11) lineCount = 0;
-        }
-
-        if (lineCount >= 11) {
-            for (int i = coordinatesN.size() - 11; i < coordinatesN.size(); i++) {
-                coordinatesN.remove(i);
+            if (lineCount < 11) {
+                lineCount = 0;
+                deleteItem = new int[11];
             }
-            lineCount = 0;
         }
     }
 
 
     public void sleepData(int data) {
         sleepData = data;
+    }
+
+    public static void selectionSort(int[] array){
+
+        for (int i = 0; i < array.length; i++) {
+            int min = array[i];
+            int min_i = i;
+
+            for (int j = i+1; j < array.length; j++) {
+                if (array[j] < min) {
+                    min = array[j];
+                    min_i = j;
+                }
+            }
+            if (i != min_i) {
+                int tmp = array[i];
+                array[i] = array[min_i];
+                array[min_i] = tmp;
+            }
+        }
     }
 }

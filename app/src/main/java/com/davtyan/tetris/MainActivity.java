@@ -1,13 +1,12 @@
 package com.davtyan.tetris;
 
 import android.app.Activity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
 public class MainActivity extends Activity implements View.OnClickListener {
     private GameSurfaceView gameSurfaceView;
-    private Figure figure;
+    private FigureState figure;
 
 
     @Override
@@ -19,7 +18,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private void initView() {
         gameSurfaceView = findViewById(R.id.game_view);
-        figure = new Figure(gameSurfaceView);
+        figure = new FigureState(gameSurfaceView);
         findViewById(R.id.move_left).setOnClickListener(this);
         findViewById(R.id.move_right).setOnClickListener(this);
         findViewById(R.id.rotate).setOnClickListener(this);
